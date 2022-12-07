@@ -1,0 +1,134 @@
+@mixin title {
+  font-size: 6rem;
+  line-height: 1.167;
+  letter-spacing: -0.01562em;
+  font-weight: 700;
+}
+
+@mixin titleMobile {
+  font-size: 4rem;
+}
+
+@mixin selectionText {
+  font-size: 3rem;
+  font-weight: 500;
+  background-color: $lightest-blue;
+  border-radius: 0.2rem;
+  height: 4rem;
+  // opacity: 1;
+  transition: 0.3s;
+}
+
+@mixin selectionTextMobile {
+  font-size: 2rem;
+  height: 3rem;
+  text-align: center;
+}
+
+@mixin contentSection {
+  margin: 3rem;
+}
+
+.homepage-navigation-title {
+  margin-right: 2rem;
+}
+
+.homepage-navigation-link {
+  margin-right: 1rem;
+}
+
+.homepage-landing {
+  background-color: $light-beige;
+  height: 100vh;
+  width: 100vw;
+  text-align: center;
+
+  opacity: 1;
+	animation-name: fadeInOpacity;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 2s;
+}
+
+.homepage-landing-hero {
+  background-color: $light-blue;
+  height: 70vh;
+  padding: 5rem 3rem;
+  text-align: -webkit-center;
+}
+
+.homepage-landing-hero-content {
+  b {
+    @include title();
+  }
+
+  .content-section {
+    @include contentSection();
+  }
+
+  .selection-block {
+    margin: 1.7rem 0;
+    width: 20rem;
+  }
+
+  .provider-selection {
+    @include selectionText();
+  }
+  
+  .client-selection {
+    @include selectionText();
+  }
+
+  .provider-selection:hover, .client-selection:hover {
+    background-color: $light-beige;
+  }
+}
+
+@keyframes fadeInOpacity {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+// .homepage-landing.load {
+//   opacity: 1;
+// }
+
+.homepage-content {
+  display: inline-block;
+  background-color: $primary-orange-light;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  width: 90%;
+}
+
+@media screen and (max-width: 600px) {
+  .homepage-landing-hero {
+    background-color: $light-blue;
+    height: 80vh;
+    padding: 1rem;
+    text-align: left;
+  }
+
+  .homepage-landing-hero-content {
+    b {
+      @include titleMobile;
+    }
+
+    .content-section {
+      margin: 0;
+    }
+  }
+
+  .provider-selection {
+    @include selectionTextMobile();
+  }
+
+  .client-selection {
+    @include selectionTextMobile();
+  }
+}
