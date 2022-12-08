@@ -1,0 +1,50 @@
+.provider-page {
+  background: $light-beige;
+  margin: 0 5rem;
+  padding: 2rem 3rem;
+
+  .provider-page-dropdown {
+    width: 100%;
+    margin: 1rem 0 3rem;
+  }
+
+  .remove-btn-container {
+    padding-top: 0.5rem;
+    text-align: center;
+  }
+
+  .provider-page-add-another-date {
+    width: 100%;
+    color: $black;
+    text-align: center;
+    height: 3rem;
+    padding-top: 1rem;
+    font-size: 1.7rem;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    transition: 0.3s;
+  }
+
+  .light-blue {
+    background-color: $light-blue;
+  }
+
+  .orange {
+    background-color: $primary-orange;
+  }
+
+  .provider-page-add-another-date:hover {
+    background-color: $electric-blue;
+  }
+
+  .provider-page-add-another-date.orange:hover {
+    background-color: $bright-orange;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .provider-page {
+    margin: 0;
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,39 @@
+.client-page {
+  background: $light-beige;
+  margin: 0 5rem;
+  padding: 2rem 3rem;
+
+  .client-page-dropdown {
+    width: 100%;
+    margin: 1rem 0 3rem;
+  }
+
+  .client-page-confirm {
+    width: 100%;
+    background-color: $light-blue;
+    color: $black;
+    text-align: center;
+    height: 5rem;
+    padding-top: 3rem;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 2rem;
+    transition: 0.3s;
+  }
+
+  .client-page-confirm:hover {
+    background-color: #2196f3;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .client-page {
+    margin: 0;
+    padding: 1rem;
+  }
+
+  .client-page-dropdown {
+    margin: 0;
+    padding: 1rem;
+  }
+}

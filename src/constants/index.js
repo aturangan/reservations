@@ -1,9 +1,3 @@
-// export const providerList = [
-//   '(ID: 0) Provider0',
-//   '(ID: 1): Provider1',
-//   '(ID: 2): Provider2'
-// ];
-
 export const readableProviderFields = {
   'DATE': 'Date',
   'STARTTIME': 'Start time',

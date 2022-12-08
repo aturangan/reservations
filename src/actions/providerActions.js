@@ -1,6 +1,6 @@
-export const submitProviderSchedule = providerSchedule => {
+export const submitProviderSchedule = schedule => {
   return {
     type: 'SUBMIT_PROVIDER_SCHEDULE',
-    providerSchedule
+    payload: schedule
   };
 };

@@ -1,45 +1,43 @@
 import { useState } from 'react';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
 import ProviderFields from './ProviderFields.jsx';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
-
-// import './App.css';
-
-// put hard coded provider names into util folder and import 
+import { mockProvidersList } from '../../constants/mockData';
 
 export default function ProviderForm() {
-  // initialize to ID: 0 provider name if provider exists
-  const [provider, setProvider] = useState(null);
-
-  // const submitForm = event => {
-  //   event.preventDefault();
-  // };
+  const [providerID, setProviderID] = useState(mockProvidersList[0].providerID);
 
   return (
-    <>
+    <div className="provider-page">
+      <h1>Create Your Schedule</h1>
       <form>
-        <FormControl fullWidth>
+        <FormControl className="provider-page-dropdown" fullWidth>
           <InputLabel>Name (ID)</InputLabel>
           <Select
-            // value={10}
-            defaultValue="10"
-            label="Name"
-            name="name"
-            onChange={event => setProvider(event.target.value)}
+            defaultValue=""
+            label="Provider Name"
+            onChange={event => setProviderID(event.target.value)}
           >
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={30}>30</MenuItem>
+            {mockProvidersList.map((providerData, index) => {
+              const { name, providerID } = providerData;
+              return (
+                <MenuItem
+                  key={index}
+                  name={providerID}
+                  value={providerID}
+                >
+                  {name}
+                </MenuItem>
+              )
+            })}
           </Select>
         </FormControl>
-        <ProviderFields provider={provider} />
+        <ProviderFields providerID={providerID} />
         {/* <Button onClick={submitForm} variant="contained">Submit</Button> */}
       </form>
-    </>
+    </div>
   );
 }

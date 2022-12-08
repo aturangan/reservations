@@ -1,272 +1,160 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
+import { useDispatch, useSelector } from 'react-redux';
+import { mockClientsList, mockProvidersList } from '../../constants/mockData';
+import { get15minAppts } from '../../helpers/helpers';
+import moment from 'moment';
+import { saveReservation } from '../../actions/clientActions';
 
 export default function Client() {
-  // const [clientID, setClientID] = useState(null);
-  // const [providerID, setProviderID] = useState(null);
-  // const [apptID, setApptID] = useState(null);
-
-  const [apptDetails, setApptDetails] = useState({
+  const dispatch = useDispatch();
+  const initialApptDetails = {
     clientID: null,
     providerID: null,
     appointment: null, 
-  });
+  };
+  const [apptDetails, setApptDetails] = useState(initialApptDetails);
+  const providerSchedules = useSelector((state) => state.providerData.providerSchedules);
+  const [availableAppts, setAvailableAppts] = useState([]);
+  const [reservation, setReservation] = useState(null);
+  const [confirmBtnText, setConfirmBtnText] = useState('Confirm Appointment');
 
   const collectApptDetails = (category, value) => {
     setApptDetails(prevState => ({
       ...prevState,
       [category]: value,
     }));
-  }
+  };
+
+  useEffect(() => {
+    if (availableAppts && availableAppts.length > 0) setAvailableAppts([]);
+    getProviderAppts(apptDetails.providerID);
+    setConfirmBtnText('Confirm your Appointment')
+  }, [apptDetails.providerID]);
+
+  const confirmAppointment = () => {
+    const { providerID, clientID } = apptDetails;
+    const { value } = reservation;
+    const startTime = value ? value.startTime : null;
+    const endTime = value ? value.endTime : null;
+
+    dispatch(saveReservation({
+      providerID: providerID,
+      clientID: clientID,
+      startTime: (new Date(startTime)).toString(),
+      endTime: (new Date(endTime)).toString(),
+    }));
+    setConfirmBtnText('Submitted!');
+    setReservation(null);
+  };
+
+  const getProviderAppts = providerID => {
+    if (providerSchedules) {
+      const providerData = providerSchedules[providerID];
+      const schedule = providerData ? providerData.schedule : null;
+      if (providerData && schedule && (schedule.length > 0)) {
+        setAvailableAppts(get15minAppts(schedule));
+      }
+    }
+  };
+
+  const handleReserveClick = ({ timeSelected, value, index }) => {
+    setReservation({ timeSelected, value, index });
+    setConfirmBtnText('Confirm your Appointment');
+  };
 
   return (
-    <div>
-      client
-      <Select
-        // value={10}
-        defaultValue="10"
-        label="Client Name"
-        name="clientName"
-        onChange={event => collectApptDetails('clientID', event.target.value)}
-        // onChange={event => setClient(event.target.value)}
-      >
-        <MenuItem value={10}>10</MenuItem>
-        <MenuItem value={20}>20</MenuItem>
-        <MenuItem value={30}>30</MenuItem>
-      </Select>
-
-      <Select
-        // value={10}
-        defaultValue="10"
-        label="Provider Name"
-        name="providerName"
-        onChange={event => collectApptDetails('providerID', event.target.value)}
-      >
-        <MenuItem value={10}>10</MenuItem>
-        <MenuItem value={20}>20</MenuItem>
-        <MenuItem value={30}>30</MenuItem>
-      </Select>
-
-
-
-      <TextField>Name</TextField>
+    <div className="client-page">
+      <h1>Schedule with a Provider</h1>
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <FormControl className="client-page-dropdown">
+            <InputLabel>Your Name</InputLabel>
+            <Select
+              defaultValue=""
+              label="Your Name"
+              onChange={event => collectApptDetails('clientID', event.target.value)}
+            >
+              {mockClientsList.map((clientData, index) => {
+              const { name, clientID } = clientData;
+              return (
+                <MenuItem
+                  key={index}
+                  name={clientID}
+                  value={clientID}
+                >
+                  {name}
+                </MenuItem>
+              )
+            })}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl className="client-page-dropdown">
+            <InputLabel>Provider Name</InputLabel>
+            <Select
+              defaultValue=""
+              label="Provider Name"
+              onChange={event => collectApptDetails('providerID', event.target.value)}
+            >
+              {mockProvidersList.map((providerData, index) => {
+              const { name, providerID } = providerData;
+              return (
+                <MenuItem
+                  key={index}
+                  name={providerID}
+                  value={providerID}
+                >
+                  {name}
+                </MenuItem>
+              )
+            })}
+            </Select>
+          </FormControl>
+        </Grid>
+        <h1>Available Appointments</h1>
+        <Grid container spacing={2}>
+          {
+            availableAppts && (availableAppts.length > 0) && availableAppts.map((appt, index) => {
+              const startDay = moment(appt.startTime).format('MMMM Do YYYY');
+              const apptStartStr = moment(appt.startTime).format('h:mm a');
+              const apptEndStr = moment(appt.endTime).format('h:mm a');
+              
+              return (
+                <Grid 
+                  onClick={() => handleReserveClick({ timeSelected: moment(), value: appt, index: index })}
+                  key={index} 
+                  item 
+                  xs={12} 
+                  md={2}
+                >
+                  <Button
+                    sx={{
+                      backgroundColor: (reservation && reservation.index === index ? 'aliceblue' : '')
+                    }}
+                    variant="contained"
+                    key={index}
+                  >
+                    <strong>{startDay}</strong>
+                    <div>{apptStartStr}-{apptEndStr}</div>
+                  </Button>
+                </Grid>
+              )
+            })
+          }
+        </Grid>
+        {availableAppts && availableAppts.length > 0 && (
+          <div className={`client-page-confirm`} onClick={reservation ? confirmAppointment : null}>
+            {confirmBtnText}
+          </div>
+        )}
+    </Grid>
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import Button from '@mui/material/Button';
-// import TextField from '@mui/material/TextField';
-// import FormControl from '@mui/material/FormControl';
-// import InputLabel from '@mui/material/InputLabel';
-// import Select from '@mui/material/Select';
-// import MenuItem from '@mui/material/MenuItem';
-// import Grid from '@mui/material/Grid';
-// import { submitProviderSchedule } from '../../actions/providerActions';
-// import { isValidDate, isValidTime } from '../../utils/errorHandling';
-// import {
-//   dateStr,
-//   readableProviderFields,
-//   startTimeStr,
-//   endTimeStr
-// } from '../../constants';
-// import { useDispatch, useSelector } from 'react-redux';
-
-// const {
-//   DATE,
-//   STARTTIME,
-//   ENDTIME,
-// } = readableProviderFields;
-
-// export default function ProviderFields({ providerID }) {
-//   const initialForm = {
-//     date: '',
-//     startTime: '',
-//     // startDayOrNight: '',
-//     endTime: '', 
-//     // endDayOrNight: '',
-//   };
-//   const [formFields, setFormFields] = useState([initialForm]);
-//   const [errors, setErrors] = useState(null);
-//   const dispatch = useDispatch();
-//   const test = useSelector((state) => state);
-
-//   useEffect(() => {
-//     console.log('form fields: ', formFields);
-//     setFormFields([initialForm]);
-//     setErrors(null);
-//   }, [providerID]);
-
-//   useEffect(() => {
-//     console.log('mounted');
-//     console.log('test: ', test);
-//   })
-
-//   const handleFormChange = (event, index) => {
-//     const { name, value } = event.target;
-//     let data = [...formFields];
-//     data[index][name] = value;
-//     setFormFields(data);
-//   };
-
-//   const addFields = () => {
-//     let newField = { 
-//       // name: '',
-//       date: '',
-//       startTime: '',
-//       // startDayOrNight: '',
-//       endTime: '',
-//       // endDayOrNight: '',
-//     };
-//     setFormFields([...formFields, newField]);
-//   };
-
-//   const removeFields = (index) => {
-//     let providerFormData = [...formFields];
-//     providerFormData.splice(index, 1);
-//     setFormFields(providerFormData);
-//   };
-
-//   const submitForm = event => {
-//     const errorsList = [];
-//     const filledFields = Object.entries(formFields);
-
-//     formFields.forEach((field, index) => {
-//       // console.log(`${index}: ${key} = ${JSON.stringify(value)}`);
-
-//     // for (let [index, [category, value]] of filledFields.entries()) {
-//       const readableIndex = index + 1;
-//       if (!isValidDate(field[dateStr])) {
-//         errorsList.push(`#${readableIndex}: ${DATE} needs to be valid & in MM/DD/YYYY format.`)
-//       }
-
-//       if (!isValidTime(field[startTimeStr])) {
-//         errorsList.push(`#${readableIndex}: ${STARTTIME} needs to be in valid 24 hour format (HH:MM).`);
-//       }
-
-//       if (!isValidTime(field[endTimeStr])) {
-//         errorsList.push(`#${readableIndex}: ${ENDTIME} needs to be in valid 24 hour format (HH:MM).`);
-//       }
-//       // if ((field[startTimeStr] || field[endTimeStr]) && !isValidTime(value)) {
-//       // }
-//       console.log('errors: ', errors);
-//       setErrors(errorsList);
-//     });
-
-//     // if (!errors || errors.length < 1) {
-//     //   // submit 
-//     // }
-//     dispatch(submitProviderSchedule({
-//       id: providerID,
-//       schedule: formFields,
-//     }));
-
-//     event.preventDefault();
-//   };
-
-//   return (
-//     <>
-//       {formFields.map((form, index) => {
-//         const {
-//           date,
-//           startTime,
-//           // startDayOrNight,
-//           endTime,
-//           // endDayOrNight,
-//         } = form;
-//         return (
-//           <Grid container spacing={2} key={index}>
-//             {index + 1}
-//             <Grid item xs={12} sm={3}>
-//               <TextField
-//                 fullWidth
-//                 label="Date (MM/DD/YYYY)"
-//                 name={dateStr}
-//                 onChange={event => handleFormChange(event, index)}
-//                 variant="outlined"
-//               />
-//             </Grid>
-//             <Grid item xs={12} sm={3}>
-//               <TextField
-//                 fullWidth
-//                 label="Start Time in 24 hour format (HH:MM)"
-//                 name={startTimeStr}
-//                 onChange={event => handleFormChange(event, index)}
-//                 value={startTime}
-//                 variant="outlined"
-//               />
-//             </Grid>
-//             {/* <Grid item xs={12} sm={2}>
-//               <Select
-//                 defaultValue="AM"
-//                 name="startDayOrNight"
-//                 onChange={event => handleFormChange(event, index)}
-//               >
-//                 <MenuItem value="AM">AM</MenuItem>
-//                 <MenuItem value="PM">PM</MenuItem>
-//               </Select>
-//             </Grid> */}
-//             <Grid item xs={12} sm={3}>
-//               <TextField
-//                 fullWidth
-//                 label="End Time in 24 Hour Format (HH:MM)"
-//                 name={endTimeStr}
-//                 onChange={event => handleFormChange(event, index)}
-//                 value={endTime}
-//                 variant="outlined"
-//               />
-//             </Grid>
-//             {/* <Grid item xs={12} sm={2}>
-//               <Select
-//                 defaultValue="PM"
-//                 label="Name"
-//                 name="endDayOrNight"
-//                 onChange={event => handleFormChange(event, index)}
-//               >
-//                 <MenuItem value="AM">AM</MenuItem>
-//                 <MenuItem value="PM">PM</MenuItem>
-//               </Select>
-//             </Grid> */}
-//             <Grid item xs={12} sm={2}>
-//               <Button onClick={() => removeFields(index)} variant="contained">Remove</Button>
-//             </Grid>
-//           </Grid>
-//         )
-//       })}
-//       <Button onClick={addFields} variant="contained">Add More..</Button>
-//       <br />
-//       <Button onClick={submitForm} variant="contained">Submit</Button>
-//       {errors && errors.length > 0 ?
-//         <>
-//           <section>Please correct the following:</section>
-//           <br />
-//           <div>
-//             {/* {errors} */}
-//             {errors.map((error, index) => <li key={index}>{error}</li>)}
-//             {/* {errors.map(error => {
-//               <p>{error}</p> 
-//             })} */}
-//           </div>
-//         </>
-//         : null
-//       }
-//     </>
-//   );
-// }
